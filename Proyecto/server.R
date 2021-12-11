@@ -89,13 +89,10 @@ shinyServer(function(input,output,session){
       p<-ggplot(data=res, aes(x=label, y=y)) +#,fill=label
         geom_bar(stat="identity")+#, fill="steelblue"
         geom_text(aes(label=y), vjust=1.6, color="white", size=3.5)+
-        labs(title=paste0("Cantidad de Vuelos por dia",input$month), 
+        labs(title=paste0("Cantidad de Vuelos por dia ",input$month), 
              x="dia", y = "Cantidad")+
         theme_minimal()
     }
-    
-    #
-    
     
     p
   })
@@ -151,4 +148,9 @@ shinyServer(function(input,output,session){
     print(round(input$bar_flighs_click$x))
   })
  
+  
+  output$details <- DT::renderDataTable({
+    vuelos()
+  })
+  
 })
