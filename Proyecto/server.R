@@ -1,4 +1,5 @@
 library(shiny)
+library(ggplot2)
 
 shinyServer(function(input,output,session){
   
@@ -22,7 +23,7 @@ shinyServer(function(input,output,session){
   
   #mostramos los vuelos totales
   output$vuelos_totales <- renderValueBox({
-    vuelos_tot <- vuelos() %>%tally()%>%pull()%>%as.integer()%>%valueBox(subtitle = "Numbero de Vuelos", color ='aqua',icon = icon("plane"))
+    vuelos_tot <- vuelos() %>%tally()%>%pull()%>%as.integer()%>%valueBox(subtitle = "Numero de Vuelos", color ='aqua',icon = icon("plane"))
     vuelos_tot
   })
   
@@ -51,6 +52,37 @@ shinyServer(function(input,output,session){
       paste0("%") %>%
       valueBox(subtitle = "Vuelos Tarde", color ='red',icon = icon("plane-slash"))
     
+  })
+  
+  output$hist<-renderPlot({
+    grouped <- ifelse(input$month != 30, expr(day), expr(month))
+    
+    res <- vuelos() %>%
+      group_by(!!grouped) %>%
+      tally() %>%
+      collect() %>%
+      mutate(
+        y = n,
+        x = !!grouped
+      ) %>%
+      select(x, y)
+    
+    if (input$month == 30) {
+      res <- res %>%
+        inner_join(
+          tibble(x = 1:12, label = substr(month.name, 1, 3)),
+          by = "x"
+        )
+    } else {
+      res <- res %>%
+        mutate(label = x)
+    }
+    
+    p<-ggplot(data=res, aes(x=label, y=y)) +
+      geom_bar(stat="identity", fill="steelblue")+
+      geom_text(aes(label=y), vjust=1.6, color="white", size=3.5)
+      theme_minimal()
+    p
   })
  
 })

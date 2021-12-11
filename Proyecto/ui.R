@@ -49,7 +49,8 @@ dashboardPage(
         fluidRow(
           column(
             width = 6,
-            d3Output("group_totals")
+            plotOutput(outputId = "hist")
+            #d3Output("group_totals")
           ),
           column(
             width = 6,
