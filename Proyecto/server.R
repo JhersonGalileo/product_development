@@ -125,32 +125,33 @@ shinyServer(function(input,output,session){
     
   })
   
-  get_details <- function(airport = NULL, day = NULL) {
-    
-    res <- vuelos()
-    if (!is.null(airport)) res <- filter(res, dest == airport)
-    if (!is.null(day)) res <- filter(res, day == !!as.integer(day))
-    
-    res %>%
-      head(100) %>%
-      select(
-        month, day, flight, tailnum,
-        dep_time, arr_time, dest_name,
-        distance
-      ) %>%
-      collect() %>%
-      mutate(month = month.name[as.integer(month)])
-  }
-  
-  
-  
+
   observeEvent(input$bar_flighs_click,{
-    print(round(input$bar_flighs_click$x))
-  })
+    
+    
+    if(round(input$bar_flighs_click$x)>0){
+      clicked <- round(input$bar_flighs_click$x)
+        if(input$month==30){
+          new_df <- vuelos()%>%filter(month==clicked)
+          updateTable(new_df)
+        }else{
+          new_df <- vuelos()%>%filter(month==input$month,day==clicked)
+          updateTable(new_df)
+        }
+    }
+ })
  
+  
+  
+  updateTable<- function(new_df){
+    output$details <- DT::renderDataTable({
+      new_df
+    })
+  }
   
   output$details <- DT::renderDataTable({
     vuelos()
+    
   })
   
 })
