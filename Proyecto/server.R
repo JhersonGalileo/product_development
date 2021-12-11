@@ -54,7 +54,7 @@ shinyServer(function(input,output,session){
     
   })
   
-  output$hist<-renderPlot({
+  output$barplot_airplane<-renderPlot({
     grouped <- ifelse(input$month != 30, expr(day), expr(month))
     
     res <- vuelos() %>%
@@ -73,16 +73,82 @@ shinyServer(function(input,output,session){
           tibble(x = 1:12, label = substr(month.name, 1, 3)),
           by = "x"
         )
+      res$label = factor(res$label, levels = month.abb)
+      
+      p<-ggplot(data=res, aes(x=label, y=y)) +#,fill=label
+        geom_bar(stat="identity")+#, fill="steelblue"
+        geom_text(aes(label=y), vjust=1.6, color="white", size=3.5)+
+        labs(title="Cantidad de Vuelos por mes", 
+             x="Mes", y = "Cantidad")+
+        theme_minimal()
+      
     } else {
       res <- res %>%
         mutate(label = x)
+      
+      p<-ggplot(data=res, aes(x=label, y=y)) +#,fill=label
+        geom_bar(stat="identity")+#, fill="steelblue"
+        geom_text(aes(label=y), vjust=1.6, color="white", size=3.5)+
+        labs(title=paste0("Cantidad de Vuelos por dia",input$month), 
+             x="dia", y = "Cantidad")+
+        theme_minimal()
     }
     
-    p<-ggplot(data=res, aes(x=label, y=y)) +
-      geom_bar(stat="identity", fill="steelblue")+
-      geom_text(aes(label=y), vjust=1.6, color="white", size=3.5)
+    #
+    
+    
+    p
+  })
+  
+  
+  output$barplot_top_airports<- renderPlot({
+    top<-vuelos() %>%
+      group_by(dest, dest_name) %>%
+      tally() %>%
+      collect() %>%
+      arrange(desc(n)) %>%
+      head(10) %>%
+      arrange(dest_name) %>%
+      mutate(dest_name = str_sub(dest_name, 1, 30)) %>%
+      rename(
+        x = dest,
+        y = n,
+        label = dest_name
+      )
+    
+    
+    
+    p<-ggplot(data=top, aes(x=label, y=y,fill=label)) +
+      geom_bar(stat="identity")+#, fill="steelblue"
+      geom_text(aes(label=y), vjust=1.6, color="white", size=3.5)+
+      labs(title="Top de Aereopuertos", 
+           x="Aereopuerto", y = "Cantidad")+
       theme_minimal()
     p
+    
+  })
+  
+  get_details <- function(airport = NULL, day = NULL) {
+    
+    res <- vuelos()
+    if (!is.null(airport)) res <- filter(res, dest == airport)
+    if (!is.null(day)) res <- filter(res, day == !!as.integer(day))
+    
+    res %>%
+      head(100) %>%
+      select(
+        month, day, flight, tailnum,
+        dep_time, arr_time, dest_name,
+        distance
+      ) %>%
+      collect() %>%
+      mutate(month = month.name[as.integer(month)])
+  }
+  
+  
+  
+  observeEvent(input$bar_flighs_click,{
+    print(round(input$bar_flighs_click$x))
   })
  
 })

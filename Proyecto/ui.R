@@ -32,7 +32,12 @@ dashboardPage(
       size = 13,
       selectize = FALSE
     ),
-    actionLink("remove", "Remove detail tabs")
+    selectInput(
+      inputId = "bar_color",
+      label ="Seccione color:",
+      choices = c("aquamarine","blue","blueviolet","darkgray","chocolate"), 
+      selected="aquamarine"
+    )
   ),
   dashboardBody(
     tabsetPanel(
@@ -49,12 +54,11 @@ dashboardPage(
         fluidRow(
           column(
             width = 6,
-            plotOutput(outputId = "hist")
-            #d3Output("group_totals")
+            plotOutput(outputId = "barplot_airplane", click = "bar_flighs_click")
           ),
           column(
             width = 6,
-            d3Output("top_airports")
+            plotOutput(outputId = "barplot_top_airports")
           )
         ),
         fluidRow(
