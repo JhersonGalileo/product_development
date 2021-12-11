@@ -37,7 +37,8 @@ dashboardPage(
       label ="Seccione color:",
       choices = c("aquamarine","blue","blueviolet","darkgray","chocolate"), 
       selected="aquamarine"
-    )
+    ),
+    textInput("url_param","URL",value = "")
   ),
   dashboardBody(
     tabsetPanel(

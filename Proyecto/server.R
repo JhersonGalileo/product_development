@@ -75,8 +75,8 @@ shinyServer(function(input,output,session){
         )
       res$label = factor(res$label, levels = month.abb)
       
-      p<-ggplot(data=res, aes(x=label, y=y)) +#,fill=label
-        geom_bar(stat="identity")+#, fill="steelblue"
+      p<-ggplot(data=res, aes(x=label, y=y)) +
+        geom_bar(stat="identity",fill=input$bar_color)+
         geom_text(aes(label=y), vjust=1.6, color="white", size=3.5)+
         labs(title="Cantidad de Vuelos por mes", 
              x="Mes", y = "Cantidad")+
@@ -86,8 +86,8 @@ shinyServer(function(input,output,session){
       res <- res %>%
         mutate(label = x)
       
-      p<-ggplot(data=res, aes(x=label, y=y)) +#,fill=label
-        geom_bar(stat="identity")+#, fill="steelblue"
+      p<-ggplot(data=res, aes(x=label, y=y)) +
+        geom_bar(stat="identity", fill=input$bar_color)+
         geom_text(aes(label=y), vjust=1.6, color="white", size=3.5)+
         labs(title=paste0("Cantidad de Vuelos por dia ",input$month), 
              x="dia", y = "Cantidad")+
@@ -153,5 +153,44 @@ shinyServer(function(input,output,session){
     vuelos()
     
   })
+  
+  
+  observe({
+    query <- parseQueryString(session$clientData$url_search)
+    
+    airline   <- query[['airline']]
+    color     <- query[['color']]
+    mes       <- query[['month']]
+    
+    if(!is.null(airline)){
+      updateSelectInput(session, 'airline', selected = airline)
+    }
+    
+    if(!is.null(color)){
+      updateSelectInput(session,'bar_color', selected=color)
+    }
+    
+    if(!is.null(mes)){
+      updateSelectInput(session,'month', selected=mes)
+    }
+    
+  })
+  
+  observe({
+    airline<- input$airline
+    color <- input$bar_color
+    mes <- input$month
+    host_name <- session$clientData$url_hostname
+    protocol <- session$clientData$url_protocol
+    port <- session$clientData$url_port
+    query <- paste('?','airline=', airline,'&color=',color,'&month=',mes,sep='')
+    
+    url <- paste(protocol, '//', host_name, ':', port,'/',query, sep = '')
+    
+    updateTextInput(session, 'url_param', value = url)
+    
+  })
+  
+  
   
 })
