@@ -1,0 +1,11 @@
+mysql-connector-python
+mysqlclient
+streamlit
+numpy 
+pandas 
+sqlalchemy 
+plotly
+structlog
+
+
+
